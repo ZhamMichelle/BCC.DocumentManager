@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BCC.DocumentManager.Models
+﻿namespace BCC.DocumentManager.Models
 {
     public class ViewDocument
     {
