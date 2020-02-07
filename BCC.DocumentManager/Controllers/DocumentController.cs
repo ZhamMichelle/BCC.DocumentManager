@@ -14,23 +14,23 @@ namespace BCC.DocumentManager.Controllers
         private PostgresContext db = new PostgresContext();
 
         
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Document>>> GetDocuments()
+        [HttpGet("{page}/{size}")]
+        public async Task<ActionResult<PagedResult<Document>>> GetPaged(int page, int size)
         {
-            return await db.Documents.ToListAsync();
+            return await db.Documents.GetPagedAsync(page, size);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Document>> GetDocument(int id)
+        public async Task<ActionResult<Document>> Get(int id)
         {
             Document document = await db.Documents.FirstOrDefaultAsync(x => x.Id == id);
             if (document == null)
                 return NotFound();
-            return new ObjectResult(document);
+            return Ok(document);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Document>> PostDoc(Document document)
+        public async Task<ActionResult<Document>> Post(Document document)
         {
             if (document == null)
             {
@@ -42,7 +42,7 @@ namespace BCC.DocumentManager.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Document>> DeleteDoc(int id)
+        public async Task<ActionResult<Document>> Delete(int id)
         {
             Document document = db.Documents.FirstOrDefault(x => x.Id == id);
             if (document == null)

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BCC.DocumentManager.Models;
@@ -12,11 +11,13 @@ namespace BCC.DocumentManager.Controllers
     {
         PostgresContext db = new PostgresContext();
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<File>>> GetFiles()
+        [HttpGet("{page}/{size}")]
+        public async Task<ActionResult<PagedResult<File>>> GetFiles(int page, int size)
         {
-            return await db.Files.ToListAsync();
+            var result = await db.Files.GetPagedAsync(page, size);
+            return Ok(result);
         }
+        
 
         [HttpGet("{id}")]
         public async Task<ActionResult<File>> GetFile(int id)
