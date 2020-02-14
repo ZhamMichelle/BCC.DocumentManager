@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BCC.DocumentManager.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BCC.DocumentManager.Models;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BCC.DocumentManager.Controllers
 {
@@ -11,38 +11,30 @@ namespace BCC.DocumentManager.Controllers
     [ApiController]
     public class ProcessController : ControllerBase
     {
-        PostgresContext db = new PostgresContext();
+        private readonly PostgresContext _context;
+        private readonly ILogger<ProcessController> _logger;
+
+        public ProcessController(PostgresContext context, ILogger<ProcessController> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Process>>> GetProcesses()
         {
-            return await db.Processes.ToListAsync();
+            return await _context.Processes.ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Process>> GetProcess(int id)
+        public async Task<ActionResult<Process>> GetProcess(string id)
         {
-            Process process = await db.Processes.FirstOrDefaultAsync(x => x.Id == id);
+            Process process = await _context.Processes.FirstOrDefaultAsync(x => x.Id == id);
             if (process == null)
                 return NotFound();
             return new ObjectResult(process);
         }
-       
-        [HttpGet("getprocdoc")]
-        public async Task<ActionResult<IEnumerable<ProcessDocument>>> GetProcessDocuments()
-        {
-            return await db.ProcessDocuments.ToListAsync();
-        }
-
-        [HttpGet("getprocdoc/{id}")]
-        public async Task<ActionResult<ProcessDocument>> GetProcessDocument(int id)
-        {
-            ProcessDocument processdocument = await db.ProcessDocuments.FirstOrDefaultAsync(x => x.Id == id);
-            if (processdocument == null)
-                return NotFound();
-            return new ObjectResult(processdocument);
-        }
-
 
         [HttpPost("postprocdoc")]
         public async Task<ActionResult<ProcessDocument>> PostDoc(ProcessDocument procdoc)
@@ -51,42 +43,9 @@ namespace BCC.DocumentManager.Controllers
             {
                 return BadRequest();
             }
-            db.ProcessDocuments.Add(procdoc);
-            await db.SaveChangesAsync();
+            _context.ProcessDocuments.Add(procdoc);
+            await _context.SaveChangesAsync();
             return Ok(procdoc);
-        }
-
-        [HttpDelete("delprocdoc/{id}")]
-        public async Task<ActionResult<ProcessDocument>> DeleteProcDoc(int id)
-        {
-            ProcessDocument procdoc = db.ProcessDocuments.FirstOrDefault(x => x.Id == id);
-            if (procdoc == null)
-            {
-                return NotFound();
-            }
-            db.ProcessDocuments.Remove(procdoc);
-            await db.SaveChangesAsync();
-
-
-            Process process = db.Processes.FirstOrDefault(x => x.Id == procdoc.ProcessId);
-            if (process == null)
-            {
-                return NotFound();
-            }
-            db.Processes.Remove(process);
-            await db.SaveChangesAsync();
-
-
-            Document document = db.Documents.FirstOrDefault(x => x.Id == procdoc.DocumentId);
-            if (document == null)
-            {
-                return NotFound();
-            }
-            db.Documents.Remove(document);
-            await db.SaveChangesAsync();
-
-
-            return Ok(document);
         }
     }
 }

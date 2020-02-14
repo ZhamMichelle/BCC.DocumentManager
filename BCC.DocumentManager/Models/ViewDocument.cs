@@ -2,7 +2,6 @@
 {
     public class ViewDocument
     {
-        public int Id { get; set; }
         public int ViewId { get; set; }
         public View View { get; set; }
         public int DocumentId { get; set; }
