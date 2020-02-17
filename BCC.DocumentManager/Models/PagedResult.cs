@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BCC.DocumentManager.Models
+namespace Bcc.DocumentManager.Models
 {
     public class PagedResult<T> : PagedResultBase where T : class
     {

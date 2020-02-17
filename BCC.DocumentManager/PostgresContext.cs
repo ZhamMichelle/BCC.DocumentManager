@@ -1,7 +1,7 @@
-﻿using BCC.DocumentManager.Models;
+﻿using Bcc.DocumentManager.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BCC.DocumentManager
+namespace Bcc.DocumentManager
 {
     public class PostgresContext : DbContext
     {
@@ -20,7 +20,7 @@ namespace BCC.DocumentManager
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("server=localhost; port=5432;UserId=postgres;Password=12345;database=postgres;");
+            //optionsBuilder.UseNpgsql("server=localhost; port=5432;UserId=postgres;Password=12345;database=postgres;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,4 +1,4 @@
-﻿namespace BCC.DocumentManager.Models
+﻿namespace Bcc.DocumentManager.Models
 {
     public class ProcessDocument
     {

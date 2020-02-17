@@ -1,10 +1,10 @@
 using System;
-using BCC.DocumentManager.Models;
+using Bcc.DocumentManager.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
-namespace BCC.DocumentManager
+namespace Bcc.DocumentManager
 {
     public static class Extensions
     {

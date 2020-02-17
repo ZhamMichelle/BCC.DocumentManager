@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace BCC.DocumentManager
+namespace Bcc.DocumentManager
 {
     public class Program
     {

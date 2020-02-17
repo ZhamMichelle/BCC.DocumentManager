@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BCC.DocumentManager.Models;
+using Bcc.DocumentManager.Models;
 using Microsoft.Extensions.Logging;
 
-namespace BCC.DocumentManager.Controllers
+namespace Bcc.DocumentManager.Controllers
 {
     [Route("[controller]")]
     [ApiController]

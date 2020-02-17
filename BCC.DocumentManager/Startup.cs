@@ -10,7 +10,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System;
 
-namespace BCC.DocumentManager
+namespace Bcc.DocumentManager
 {
     public class Startup
     {

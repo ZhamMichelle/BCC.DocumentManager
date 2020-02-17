@@ -1,6 +1,6 @@
 using System;
 
-namespace BCC.DocumentManager.Models
+namespace Bcc.DocumentManager.Models
 {
     public abstract class PagedResultBase
     {

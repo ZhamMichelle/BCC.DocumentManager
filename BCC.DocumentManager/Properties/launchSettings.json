@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "BCC.DocumentManager": {
+    "Bcc.DocumentManager": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "document",

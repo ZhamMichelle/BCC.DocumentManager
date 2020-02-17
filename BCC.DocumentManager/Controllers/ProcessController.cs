@@ -1,11 +1,11 @@
-﻿using BCC.DocumentManager.Models;
+﻿using Bcc.DocumentManager.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BCC.DocumentManager.Controllers
+namespace Bcc.DocumentManager.Controllers
 {
     [Route("[controller]")]
     [ApiController]
