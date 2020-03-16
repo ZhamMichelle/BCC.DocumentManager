@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Bcc.DocumentManager.Models;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace Bcc.DocumentManager.Controllers
 {
@@ -23,15 +24,20 @@ namespace Bcc.DocumentManager.Controllers
 
         
         [HttpGet("{page}/{size}")]
-        public async Task<ActionResult<PagedResult<Document>>> GetPaged(int page, int size)
+        public async Task<ActionResult<PagedResult<Document>>> Get(int page, int size, string text)
         {
-            return await _context.Documents.GetPagedAsync(page, size);
+            var query = _context.Documents.AsQueryable();
+            if(!string.IsNullOrEmpty(text))
+            {
+                query = query.Where(c => c.Name.ToLower().Contains(text.ToLower()));
+            }
+            return await query.GetPagedAsync(page, size);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Document>> Get(int id)
         {
-            Document document = await _context.Documents.FirstOrDefaultAsync(x => x.Id == id);
+            Document document = await _context.Documents.Include(doc => doc.Types).FirstOrDefaultAsync(x => x.Id == id);
             if (document == null)
                 return NotFound();
             return Ok(document);
@@ -47,6 +53,24 @@ namespace Bcc.DocumentManager.Controllers
             _context.Documents.Add(document);
             await _context.SaveChangesAsync();
             return Ok(document);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Put(Document document) {
+            try{
+                var result = await _context.Documents.Include(d => d.Types).FirstOrDefaultAsync(c => c.Id == document.Id);
+                if(result != null) {
+                    result.Name = document.Name;
+                    result.Description = document.Description;
+                    result.Types = document.Types;
+                    await _context.SaveChangesAsync();
+                }
+                return Ok();
+            } 
+            catch(Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
         [HttpDelete("{id}")]

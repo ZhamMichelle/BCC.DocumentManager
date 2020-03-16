@@ -13,15 +13,12 @@ namespace Bcc.DocumentManager
         public DbSet<ViewDocument> ViewDocuments { get; set; }
         public DbSet<ProcessDocument> ProcessDocuments { get; set; }
         public DbSet<File> Files { get; set; }
+        public DbSet<FileContent> FileContents { get; set; }
 
         public PostgresContext()
         {
             Database.EnsureCreated();
-        }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            //optionsBuilder.UseNpgsql("server=localhost; port=5432;UserId=postgres;Password=12345;database=postgres;");
-        }
+        }        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +43,23 @@ namespace Bcc.DocumentManager
                 .HasOne(bc => bc.Document)
                 .WithMany(c => c.Views)
                 .HasForeignKey(bc => bc.DocumentId);
+
+            modelBuilder.Entity<File>()
+                .HasIndex(f => f.BusinessKey);
+            modelBuilder.Entity<File>()
+                .HasIndex(f => f.ClientIin);
+            modelBuilder.Entity<File>()
+                .HasIndex(f => f.ColvirId);
+            
+            modelBuilder.Entity<File>()
+                .HasOne(f => f.FileContent)
+                .WithOne(fc => fc.File)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                entity.SetTableName($"DOC_{entity.GetTableName()}");
+            }
         }
 
     }

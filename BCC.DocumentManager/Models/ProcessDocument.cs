@@ -7,5 +7,6 @@
         public int DocumentId { get; set; }
         public Document Document { get; set; }
         public bool IsRequired { get; set; }
+        public bool IsCapturePhoto { get; set; }
     }
 }

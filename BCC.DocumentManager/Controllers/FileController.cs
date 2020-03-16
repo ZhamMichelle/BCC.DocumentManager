@@ -50,5 +50,74 @@ namespace Bcc.DocumentManager.Controllers
             _context.Files.Include(i => i.Document).ThenInclude(ti => ti.Views);
             return await _context.Files.Where(w => w.ClientIin == iin).Where(w => w.Document.Views.Any(view => view.ViewId == viewId)).ToListAsync();
         }
+
+        [HttpPost("upload")]
+        public async Task<ActionResult> Upload([FromForm] UploadRequest request)
+        {
+            using var stream = new System.IO.MemoryStream();
+            await request.File.CopyToAsync(stream);
+
+            var file = await _context.Files.FindAsync(request.FileId);
+            file.Name = request.File.FileName;
+            file.Type = request.File.ContentType;
+
+            var fileContent = new FileContent()
+            {
+                Id = file.FileContentId,
+                Content = stream.ToArray(),
+                File = file            
+            };
+            if(string.IsNullOrEmpty(fileContent.Id)){                
+                fileContent.Id = System.Guid.NewGuid().ToString();
+                _context.FileContents.Add(fileContent);
+            }
+            else {
+                _context.FileContents.Update(fileContent);
+            }
+            await _context.SaveChangesAsync();
+            return Ok(fileContent.Id);
+        }
+
+        [HttpGet("{id}/documentType/{documentTypeId}")]
+        public async Task<ActionResult> SetDocumentType(int id, string documentTypeId) {
+            var file = await _context.Files.FindAsync(id);
+            if(file == null) {
+                return BadRequest();
+            }
+            file.DocumentTypeId = documentTypeId;
+            _context.Files.Update(file);
+            await _context.SaveChangesAsync();            
+            return Ok();
+        }
+
+        [HttpGet("download/{id}")]
+        public async Task<ActionResult> Download(string id)
+        {
+            var fileContent = await _context.FileContents.Include(fc => fc.File).FirstOrDefaultAsync(fc => fc.Id == id);            
+            return File(fileContent.Content, fileContent.File.Type, fileContent.File.Name);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(string id){
+            var fileContent = await _context.FileContents.FindAsync(id);
+            if(fileContent == null) {
+                return BadRequest();
+            }
+            _context.FileContents.Remove(fileContent);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost("/{id}/procDocRequired/{isRequired}")]
+        public async Task<ActionResult> setProcessDocRequired(int id, bool isRequired) {
+            var file = await _context.Files.FindAsync(id);        
+            if(file == null) {
+                return NotFound();
+            }
+            file.IsRequired = isRequired;
+            _context.Files.Update(file);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
     }
 }

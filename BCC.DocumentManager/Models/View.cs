@@ -10,7 +10,7 @@ namespace Bcc.DocumentManager.Models
         }
         public int Id { get; set; }
         public string Name { get; set; }
-        public int ProcessId { get; set; }
+        public string ProcessId { get; set; }
         public Process Process { get; set; }
         public List<ViewDocument> Documents { get; set; }
     }

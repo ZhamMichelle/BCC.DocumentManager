@@ -1,0 +1,97 @@
+image: alpine:latest
+
+variables:
+  PROXY_CONFIG: '{"proxies": {"default": {"httpProxy": "$HTTP_PROXY", "httpsProxy": "$HTTPS_PROXY", "noProxy": "$NO_PROXY"}}}'
+  IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - test
+  - build
+  - release
+  - deploy
+
+.docker_before: &docker_before
+  - mkdir -p $HOME/.docker/ && echo $PROXY_CONFIG > $HOME/.docker/config.json
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+test:
+  stage: test
+  script:
+    - echo 'Test stage not implemented. To be continued...'
+
+build:
+  stage: build
+  image: docker:stable
+  services:
+    - docker:19.03.1-dind
+  cache:
+    untracked: true
+    key: ${CI_PROJECT_ID}
+    paths:
+      - /cache
+  before_script:
+    - *docker_before
+  script:
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest -t $IMAGE_NAME -f $CI_PROJECT_DIR/Bcc.DocumentManager/Dockerfile .
+    - docker push $IMAGE_NAME
+
+release:
+  stage: release
+  image: docker:stable
+  only:
+    - master
+    - /^release-v.*$/i
+  services:
+    - docker:19.03.1-dind
+  cache:
+    untracked: true
+    key: ${CI_PROJECT_ID}
+    paths:
+      - /cache
+  before_script:
+    - *docker_before
+  script:
+    - docker pull $IMAGE_NAME
+    - docker tag $IMAGE_NAME ${CI_REGISTRY_IMAGE}:latest
+    - docker push ${CI_REGISTRY_IMAGE}:latest
+
+
+.base_deploy: &base_deploy
+  stage: deploy
+  interruptible: true
+  before_script:
+    - apk add curl
+  script:
+    - curl --location --request POST "${CI_API_V4_URL}/projects/207/trigger/pipeline"
+        --header "Content-Type':' application/x-www-form-urlencoded"
+        --data-urlencode "token=${CI_JOB_TOKEN}"
+        --data-urlencode "ref=${BCC_ENV}"
+        --data-urlencode "variables[BCC_PROJECT]=${CI_PROJECT_NAME}"
+        --data-urlencode "variables[BCC_IMAGE_TAG]=${CI_COMMIT_REF_SLUG}"
+        --data-urlencode "variables[BCC_IMAGE_HASH]=${CI_COMMIT_SHORT_SHA}"
+
+Deploy to Development:
+  <<: *base_deploy
+  only:
+    - develop
+  variables:
+    BCC_ENV: develop
+
+Deploy to Preview:
+  <<: *base_deploy
+  only:
+    - master
+    - /^release-v.*$/i
+  variables:
+    BCC_ENV: preview
+
+Deploy to Production:
+  <<: *base_deploy
+  when: manual
+  only:
+    - /^release-v.*$/i
+  variables:
+    BCC_ENV: production
